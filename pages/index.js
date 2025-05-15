@@ -56,7 +56,7 @@ export default function Home() {
 
     return (
         <div className={styles.container}>
-            <h1>JWT CTF Challenge</h1>
+            <h1>Attack On Hash Function Web_Challenge</h1>
 
             <div className={styles.tabs}>
                 <button
