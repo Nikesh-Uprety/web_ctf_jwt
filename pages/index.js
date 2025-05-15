@@ -1,103 +1,117 @@
 import { useState } from 'react';
+import styles from '../styles/Home.module.css';
 
 export default function Home() {
-    const [action, setAction] = useState('login');
+    const [mode, setMode] = useState('login');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [token, setToken] = useState('');
-    const [adminData, setAdminData] = useState(null);
-    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+    const [isError, setIsError] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        setIsError(false);
+        setMessage('');
 
         try {
-            const endpoint = action === 'login' ? '/api/login' : '/api/register';
+            const endpoint = `/api/${mode}`;
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
             });
 
             const data = await response.json();
             if (response.ok) {
                 setToken(data.token);
+                setMessage(mode === 'login' ? 'Login successful!' : 'Registration successful!');
             } else {
-                setError(data.error || 'Something went wrong');
+                throw new Error(data.error || 'Request failed');
             }
         } catch (err) {
-            setError('Failed to connect to server');
+            setIsError(true);
+            setMessage(err.message);
         }
     };
 
     const checkAdmin = async () => {
         try {
             const response = await fetch('/api/admin', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             const data = await response.json();
             if (response.ok) {
-                setAdminData(data);
+                setIsError(false);
+                setMessage(`ADMIN ACCESS GRANTED! Flag: ${data.flag}`);
             } else {
-                setError(data.error || 'Admin access denied');
+                throw new Error(data.error || 'Admin check failed');
             }
         } catch (err) {
-            setError('Failed to connect to server');
+            setIsError(true);
+            setMessage(err.message);
         }
     };
 
     return (
-        <div style={{ padding: '2rem' }}>
-            <h1>User Portal</h1>
+        <div className={styles.container}>
+            <h1>JWT CTF Challenge</h1>
 
-            <div style={{ marginBottom: '1rem' }}>
-                <button onClick={() => setAction('login')}>Login</button>
-                <button onClick={() => setAction('register')}>Register</button>
+            <div className={styles.tabs}>
+                <button
+                    onClick={() => setMode('login')}
+                    className={mode === 'login' ? styles.active : ''}
+                >
+                    Login
+                </button>
+                <button
+                    onClick={() => setMode('register')}
+                    className={mode === 'register' ? styles.active : ''}
+                >
+                    Register
+                </button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ marginBottom: '1rem' }}>
-                <div>
-                    <label>Username: </label>
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>Password: </label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
-                <button type="submit">{action === 'login' ? 'Login' : 'Register'}</button>
+            <form onSubmit={handleSubmit} className={styles.form}>
+                <input
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                />
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <button type="submit">
+                    {mode === 'login' ? 'Login' : 'Register'}
+                </button>
             </form>
 
+            {message && (
+                <p className={isError ? styles.error : styles.success}>
+                    {message}
+                </p>
+            )}
+
             {token && (
-                <div style={{ margin: '1rem 0' }}>
-                    <h3>Your Token:</h3>
+                <div className={styles.tokenSection}>
+                    <h3>Your JWT Token:</h3>
                     <textarea
-                        readOnly
                         value={token}
-                        style={{ width: '100%', minHeight: '100px' }}
+                        readOnly
+                        className={styles.tokenDisplay}
                     />
-                    <button onClick={checkAdmin}>Check Admin Access</button>
+                    <button onClick={checkAdmin} className={styles.adminButton}>
+                        Try Admin Access
+                    </button>
                 </div>
             )}
-
-            {adminData && (
-                <div style={{ margin: '1rem 0', color: 'green' }}>
-                    <h2>Admin Dashboard</h2>
-                    <p>{adminData.message}</p>
-                    <p><strong>Flag:</strong> {adminData.flag}</p>
-                </div>
-            )}
-
-            {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );
 }
