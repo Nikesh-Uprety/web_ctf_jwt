@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin
+Allow: /hidden
+JWT_SECRET=CTF_S3CR3T_K3Y

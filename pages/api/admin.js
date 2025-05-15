@@ -17,7 +17,7 @@ export default function handler(req, res) {
 
         res.status(200).json({
             message: 'Welcome admin!',
-            flag: process.env.FLAG || 'CTF{test_flag}'
+            flag: process.env.FLAG
         });
     } catch (err) {
         res.status(401).json({ error: 'Invalid token' });
