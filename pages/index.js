@@ -6,11 +6,13 @@ export default function Home() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [token, setToken] = useState('');
+    const [editedToken, setEditedToken] = useState('');
     const [message, setMessage] = useState('');
     const [isError, setIsError] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isTokenEditable, setIsTokenEditable] = useState(false);
 
-    // Matrix Rain Effect
+    // Matrix Rain Effect (unchanged)
     useEffect(() => {
         const canvas = document.createElement('canvas');
         canvas.className = styles.matrixCanvas;
@@ -82,6 +84,7 @@ export default function Home() {
             const data = await response.json();
             if (response.ok) {
                 setToken(data.token);
+                setEditedToken(data.token); // Initialize editedToken with received token
                 setMessage('Authentication successful');
             } else {
                 throw new Error(data.error || 'Request failed');
@@ -98,7 +101,7 @@ export default function Home() {
         setIsLoading(true);
         try {
             const response = await fetch('/api/admin', {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${isTokenEditable ? editedToken : token}` },
             });
 
             const data = await response.json();
@@ -113,6 +116,13 @@ export default function Home() {
             setMessage(`Error: ${err.message}`);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleTokenEdit = () => {
+        setIsTokenEditable(!isTokenEditable);
+        if (!isTokenEditable) {
+            setEditedToken(token); // Reset to original token when toggling edit
         }
     };
 
@@ -188,11 +198,19 @@ export default function Home() {
                 <div className={styles.tokenContainer}>
                     <div className={styles.tokenHeader}>
                         <h3>Your Token:</h3>
+                        <button
+                            onClick={handleTokenEdit}
+                            className={styles.editBtn}
+                        >
+                            {isTokenEditable ? 'Lock' : 'Edit'}
+                        </button>
                     </div>
-                    <textarea
-                        value={token}
-                        readOnly
-                        className={styles.tokenDisplay}
+                    <input
+                        type="text"
+                        value={isTokenEditable ? editedToken : token}
+                        onChange={(e) => setEditedToken(e.target.value)}
+                        readOnly={!isTokenEditable}
+                        className={`${styles.tokenDisplay} ${isTokenEditable ? styles.editable : ''}`}
                     />
                     <button
                         onClick={checkAdmin}
