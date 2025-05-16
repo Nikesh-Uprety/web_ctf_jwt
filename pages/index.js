@@ -10,51 +10,55 @@ export default function Home() {
     const [isError, setIsError] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Matrix rain effect
+    // Matrix Rain Effect
     useEffect(() => {
         const canvas = document.createElement('canvas');
-        canvas.className = styles.matrix;
+        canvas.className = styles.matrixCanvas;
         document.body.appendChild(canvas);
 
         const ctx = canvas.getContext('2d');
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
 
-        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
-        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const nums = '0123456789';
-        const alphabet = katakana + latin + nums;
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
 
-        const fontSize = 16;
+        resizeCanvas();
+
+        const chars = "01";
+        const fontSize = 18;
         const columns = canvas.width / fontSize;
-        const rainDrops = [];
+        const drops = [];
 
-        for (let x = 0; x < columns; x++) {
-            rainDrops[x] = 1;
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.random() * -100;
         }
 
         const draw = () => {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = '#00ff41';
-            ctx.font = fontSize + 'px monospace';
+            ctx.fillStyle = '#0afc72';
+            ctx.font = `${fontSize}px monospace`;
 
-            for (let i = 0; i < rainDrops.length; i++) {
-                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    rainDrops[i] = 0;
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
                 }
-                rainDrops[i]++;
+                drops[i]++;
             }
         };
 
-        const interval = setInterval(draw, 30);
+        const interval = setInterval(draw, 33);
+
+        window.addEventListener('resize', resizeCanvas);
 
         return () => {
             clearInterval(interval);
+            window.removeEventListener('resize', resizeCanvas);
             document.body.removeChild(canvas);
         };
     }, []);
@@ -66,8 +70,7 @@ export default function Home() {
         setIsLoading(true);
 
         try {
-            // Simulate processing delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
 
             const endpoint = `/api/${mode}`;
             const response = await fetch(endpoint, {
@@ -79,7 +82,7 @@ export default function Home() {
             const data = await response.json();
             if (response.ok) {
                 setToken(data.token);
-                setMessage(mode === 'login' ? 'Login successful!' : 'Registration successful!');
+                setMessage('Authentication successful');
             } else {
                 throw new Error(data.error || 'Request failed');
             }
@@ -101,13 +104,13 @@ export default function Home() {
             const data = await response.json();
             if (response.ok) {
                 setIsError(false);
-                setMessage(`ADMIN ACCESS GRANTED! Flag: ${data.flag}`);
+                setMessage(`Admin access granted! Flag: ${data.flag}`);
             } else {
                 throw new Error(data.error || 'Admin check failed');
             }
         } catch (err) {
             setIsError(true);
-            setMessage(err.message);
+            setMessage(`Error: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -115,7 +118,9 @@ export default function Home() {
 
     return (
         <div className={styles.container}>
-            <h1>Attack On Hash Function Web_Challenge</h1>
+            <div className={styles.header}>
+                <h1>SECURE ACCESS TERMINAL</h1>
+            </div>
 
             <div className={styles.tabs}>
                 <button
@@ -133,38 +138,57 @@ export default function Home() {
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit" disabled={isLoading}>
+                <div className={styles.inputGroup}>
+                    <label className={styles.label}>Username:</label>
+                    <input
+                        type="text"
+                        className={styles.input}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.inputGroup}>
+                    <label className={styles.label}>Password:</label>
+                    <input
+                        type="password"
+                        className={styles.input}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    className={styles.submitBtn}
+                    disabled={isLoading}
+                >
                     {mode === 'login' ? 'Login' : 'Register'}
                 </button>
             </form>
 
-            <div className={`${styles.buffer} ${isLoading ? styles.active : ''}`}>
-                Processing
-            </div>
+            {isLoading && (
+                <div className={styles.loading}>
+                    <div className={styles.loadingDot}></div>
+                    <div className={styles.loadingDot}></div>
+                    <div className={styles.loadingDot}></div>
+                    <span>Processing...</span>
+                </div>
+            )}
 
             {message && (
-                <p className={isError ? styles.error : styles.success}>
+                <div className={`${styles.message} ${isError ? styles.error : ''}`}>
                     {message}
-                </p>
+                </div>
             )}
 
             {token && (
-                <div className={styles.tokenSection}>
-                    <h3>Your JWT Token:</h3>
+                <div className={styles.tokenContainer}>
+                    <div className={styles.tokenHeader}>
+                        <h3>Your Token:</h3>
+                    </div>
                     <textarea
                         value={token}
                         readOnly
@@ -172,10 +196,10 @@ export default function Home() {
                     />
                     <button
                         onClick={checkAdmin}
-                        className={styles.adminButton}
+                        className={styles.adminBtn}
                         disabled={isLoading}
                     >
-                        Try Admin Access
+                        Request Admin Access
                     </button>
                 </div>
             )}
