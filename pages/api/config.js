@@ -4,7 +4,7 @@ export default function handler(req, res) {
 
         res.status(200).json({
             secret: "UEdTX0YzUEUzR19YM0w =",
-            message: "Nice find! Use this to sign admin JWTs"
+            message: "Nice finddd! Use this to sign admin JWTs"
         });
     } 
 
