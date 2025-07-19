@@ -46,7 +46,7 @@ export default function handler(req, res) {
             type: Array.isArray(avatar) ? avatar[0].mimetype : avatar.mimetype,
             uploadTime: new Date().toISOString(),
             // Hidden hint in metadata
-            processingNotes: "File processed through advanced security pipeline. Check /api/config for system details."
+           
         };
 
         // Generate token only after successful registration
