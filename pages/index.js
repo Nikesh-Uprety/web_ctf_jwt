@@ -307,48 +307,6 @@ export default function Home() {
                         </button>
                     </div>
                 )}
-
-                <div className={styles.uploadSection}>
-                    <div className={styles.uploadHeader}>
-                        <h3>File Analysis Tool</h3>
-                        <span className={styles.badge}>BETA</span>
-                    </div>
-                    <p className={styles.uploadDescription}>
-                        Upload any file for advanced security analysis. Our system supports all file types 
-                        and provides detailed metadata extraction and threat assessment.
-                    </p>
-                    <div className={styles.fileUpload}>
-                        <input
-                            type="file"
-                            onChange={(e) => setUploadFile(e.target.files[0])}
-                        />
-                        <svg className={styles.fileUploadIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <div className={styles.fileUploadText}>
-                            <strong>Select file for analysis</strong>
-                            <br />
-                            <small>All formats supported • Advanced scanning</small>
-                        </div>
-                    </div>
-                    {uploadFile && (
-                        <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#667eea' }}>
-                            Ready to analyze: {uploadFile.name}
-                        </p>
-                    )}
-                    <button
-                        onClick={handleFileUpload}
-                        className={styles.uploadBtn}
-                        disabled={isLoading || !uploadFile}
-                    >
-                        Analyze File
-                    </button>
-                    {uploadResult && (
-                        <div className={styles.uploadResult}>
-                            {uploadResult}
-                        </div>
-                    )}
-                </div>
             </div>
         </div>
     );
