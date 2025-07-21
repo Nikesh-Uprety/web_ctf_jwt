@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web_challenge:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - FLAG=${FLAG}
+    env_file:
+      - .env
+    restart: unless-stopped
